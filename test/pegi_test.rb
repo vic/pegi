@@ -48,11 +48,12 @@ describe Pegi::Grammar do
 
   it 'chain output of rule as input of another with >>'  do
     o = peg {
-      rule :reverse, ->(s) { s.reverse }
       rule :hi, /lle/
-      rule :hello, reverse >> hi
+      rule :hello, r(:reverse) >> hi
+      rule :olleh, hi << :reverse
     }
     assert_equal "lle", o.hello("hello").to_s
+    assert_equal "lle", o.olleh("hello").to_s
   end
 
   it 'peeks positive with +' do
@@ -71,12 +72,18 @@ describe Pegi::Grammar do
     assert_equal "jole", o.hello(%w[jole mano].each)
   end
   
-  it 'chain stream of rules with +' do
+  it 'chain on input stream with +' do
     o = peg {
-      rule :he, /he/i
-      rule :lo, /lo/
-      rule :hello, he + lo
+      rule :hello, r('he') + r('llo')
     }
-    assert o.hello(%w[He llo].each)
+    assert_equal 'llo', o.hello(%w[he llo].each).to_s
   end
+  
+  it 'chain on input stream with negative look ahead with -' do
+    o = peg {
+      rule :hello, r('he') - r('yo') + r('llo')
+    }
+    assert_equal 'llo', o.hello(%w[he llo].each).to_s
+  end
+
 end
