@@ -85,5 +85,12 @@ describe Pegi::Grammar do
     }
     assert_equal 'llo', o.hello(%w[he llo].each).to_s
   end
+  
+  it 'doesnt match if reached end of input' do
+    o = peg {
+      rule :hello, r('he') + r('llo') + r('cruel') + r('world')
+    }
+    assert_nil o.hello(%w[he llo].each)
+  end
 
 end
